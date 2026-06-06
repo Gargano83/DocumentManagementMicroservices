@@ -1,20 +1,26 @@
+using DocumentManagementMicroservices.DocumentService.Infrastracture.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Aggiunge i default di Aspire (Telemetria, HealthChecks, ecc.)
+builder.AddServiceDefaults();
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+
+#region REGISTRAZIONE SERVIZI E INFRASTRUTTURA
+// Registra il client di MongoDB fornito da Aspire puntando al collegamento 'documentdb'
+builder.AddMongoDBClient("documentdb");
+
+// Registra il nostro Repository per la Dependency Injection
+builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
+
+// Registra il servizio in background per il Data Seeding
+builder.Services.AddHostedService<DocumentManagementMicroservices.DocumentService.Infrastracture.Data.MongoDbSeeder>();
+#endregion
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
-app.UseHttpsRedirection();
+app.MapDefaultEndpoints();
 
 app.UseAuthorization();
 
