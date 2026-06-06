@@ -6,6 +6,12 @@
     <ProjectReference Include="..\DocumentManagementMicroservices.ApiGateway\DocumentManagementMicroservices.ApiGateway.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.MongoDB" Version="13.4.2" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.4.2" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="13.4.2" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
