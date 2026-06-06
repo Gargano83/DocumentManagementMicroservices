@@ -1,0 +1,6 @@
+@DocumentManagementMicroservices.IdentityService_HostAddress = http://localhost:5181
+
+GET {{DocumentManagementMicroservices.IdentityService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
