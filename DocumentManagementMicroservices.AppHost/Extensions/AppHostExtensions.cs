@@ -39,7 +39,9 @@ namespace DocumentManagementMicroservices.AppHost.Extensions
         {
             var identityService = builder.AddProject<Projects.DocumentManagementMicroservices_IdentityService>("identityservice")
                                             .WithReference(infra.Redis)
-                                            .WaitFor(infra.Redis);
+                                            .WithReference(infra.RabbitMQ)
+                                            .WaitFor(infra.Redis)
+                                            .WaitFor(infra.RabbitMQ);
 
             var documentService = builder.AddProject<Projects.DocumentManagementMicroservices_DocumentService>("documentservice")
                                             .WithReference(infra.DocumentDb)

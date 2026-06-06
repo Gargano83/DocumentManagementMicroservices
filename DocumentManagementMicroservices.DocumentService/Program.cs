@@ -8,6 +8,8 @@ builder.AddServiceDefaults();
 
 builder.Services.AddControllers();
 
+builder.Services.AddOpenApi();
+
 #region REGISTRAZIONE SERVIZI E INFRASTRUTTURA
 // Registrazione del client di MongoDB fornito da Aspire puntando al collegamento 'documentdb'
 builder.AddMongoDBClient("documentdb");
@@ -49,8 +51,13 @@ var app = builder.Build();
 
 app.MapDefaultEndpoints();
 
-app.UseAuthorization();
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
 
+app.UseHttpsRedirection();
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
