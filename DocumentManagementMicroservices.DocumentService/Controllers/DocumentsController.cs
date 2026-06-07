@@ -1,4 +1,5 @@
-﻿using DocumentManagementMicroservices.DocumentService.Features.Documents.Commands.ChangeDocumentStatus;
+﻿using Asp.Versioning;
+using DocumentManagementMicroservices.DocumentService.Features.Documents.Commands.ChangeDocumentStatus;
 using DocumentManagementMicroservices.DocumentService.Features.Documents.Commands.CreateProformaFromQuote;
 using DocumentManagementMicroservices.DocumentService.Features.Documents.Commands.CreateQuote;
 using DocumentManagementMicroservices.DocumentService.Features.Documents.Commands.UpdateQuote;
@@ -9,7 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DocumentManagementMicroservices.DocumentService.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     public class DocumentsController : ControllerBase
     {

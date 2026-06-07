@@ -2,6 +2,7 @@
   <Project Path="DocumentManagementMicroservices.ApiGateway/DocumentManagementMicroservices.ApiGateway.csproj" />
   <Project Path="DocumentManagementMicroservices.AppHost/DocumentManagementMicroservices.AppHost.csproj" />
   <Project Path="DocumentManagementMicroservices.BuildingBlocks/DocumentManagementMicroservices.BuildingBlocks.csproj" />
+  <Project Path="DocumentManagementMicroservices.DocumentService.Tests/DocumentManagementMicroservices.DocumentService.Tests.csproj" />
   <Project Path="DocumentManagementMicroservices.DocumentService/DocumentManagementMicroservices.DocumentService.csproj" />
   <Project Path="DocumentManagementMicroservices.IdentityService/DocumentManagementMicroservices.IdentityService.csproj" />
   <Project Path="DocumentManagementMicroservices.ServiceDefaults/DocumentManagementMicroservices.ServiceDefaults.csproj" />
