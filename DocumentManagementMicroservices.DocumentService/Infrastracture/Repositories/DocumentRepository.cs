@@ -86,5 +86,54 @@ namespace DocumentManagementMicroservices.DocumentService.Infrastracture.Reposit
             // Se ModifiedCount è 0, significa che la versione non corrispondeva (concorrenza) o il documento non esiste
             return result.ModifiedCount > 0;
         }
+
+        public async Task<bool> UpdateQuoteAsync(Quote quote, int expectedVersion)
+        {
+            var filter = Builders<DocumentBase>.Filter.And(
+                Builders<DocumentBase>.Filter.Eq(d => d.Id, quote.Id),
+                Builders<DocumentBase>.Filter.Eq(d => d.Version, expectedVersion)
+            );
+
+            // Incremeno la versione prima del salvataggio effettivo
+            quote.Version++;
+
+            // Uso ReplaceOneAsync per sovrascrivere l'intero documento
+            var result = await _collection.ReplaceOneAsync(filter, quote);
+
+            return result.ModifiedCount > 0;
+        }
+
+        public async Task<(IEnumerable<DocumentBase> Items, long TotalCount)> SearchAsync(string? customerId, string? status, string? documentType, int pageNumber, int pageSize)
+        {
+            var builder = Builders<DocumentBase>.Filter;
+            var filter = builder.Empty;
+
+            if (!string.IsNullOrEmpty(customerId))
+            {
+                filter &= builder.Eq(d => d.CustomerId, customerId);
+            }
+
+            if (!string.IsNullOrEmpty(status) && Enum.TryParse<DocumentStatus>(status, true, out var parsedStatus))
+            {
+                filter &= builder.Eq(d => d.Status, parsedStatus);
+            }
+
+            if (!string.IsNullOrEmpty(documentType))
+            {
+                // Utilizzo il discriminatore nativo di MongoDB (_t)
+                filter &= builder.Eq("_t", documentType);
+            }
+
+            // Eseguo il conteggio totale per la paginazione
+            var totalCount = await _collection.CountDocumentsAsync(filter);
+
+            // Estraggo la pagina corrente
+            var items = await _collection.Find(filter).SortByDescending(d => d.IssueDate)
+                                                        .Skip((pageNumber - 1) * pageSize)
+                                                        .Limit(pageSize)
+                                                        .ToListAsync();
+
+            return (items, totalCount);
+        }
     }
 }

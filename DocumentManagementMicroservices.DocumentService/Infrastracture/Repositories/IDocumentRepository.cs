@@ -25,5 +25,9 @@ namespace DocumentManagementMicroservices.DocumentService.Infrastracture.Reposit
         Task UpdateAsync(DocumentBase document);
 
         Task<bool> UpdateStatusWithConcurrencyAsync(string id, DocumentStatus newStatus, int expectedVersion);
+
+        Task<bool> UpdateQuoteAsync(Quote quote, int expectedVersion);
+
+        Task<(IEnumerable<DocumentBase> Items, long TotalCount)> SearchAsync(string? customerId, string? status, string? documentType, int pageNumber, int pageSize);
     }
 }
