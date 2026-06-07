@@ -30,6 +30,13 @@ namespace DocumentManagementMicroservices.AppHost.Extensions
             var auditlogDb = mongodb.AddDatabase("auditlogdb");
             var identityDb = mongodb.AddDatabase("identitydb");
 
+            // Configurazione del container SonarQube
+            builder.AddContainer("sonarqube", "sonarqube", "lts-community")
+                   .WithHttpEndpoint(port: 9000, targetPort: 9000, name: "sonarqube-ui")
+                   .WithBindMount("./sonarqube_data", "/opt/sonarqube/data")
+                   .WithBindMount("./sonarqube_extensions", "/opt/sonarqube/extensions")
+                   .WithBindMount("./sonarqube_logs", "/opt/sonarqube/logs");
+
             return new InfrastructureResources(redis, rabbitmq, documentDb, auditlogDb, identityDb);
         }
 
