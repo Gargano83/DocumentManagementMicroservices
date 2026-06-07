@@ -22,28 +22,34 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Que
             // Definisco la chiave di cache univoca per questo documento
             var cacheKey = $"document:{request.DocumentId}";
 
-            // Uso HybridCache: cerca prima in RAM, poi in Redis, infine esegue la factory (MongoDB)
-            var document = await _hybridCache.GetOrCreateAsync(
+            // Ora diciamo ad HybridCache di gestire e restituire direttamente il DocumentDto
+            var documentDto = await _hybridCache.GetOrCreateAsync(
                 cacheKey,
-                async cancel => await _repository.GetByIdAsync<DocumentBase>(request.DocumentId),
+                async cancel =>
+                {
+                    // 1. Chiamata effettiva a MongoDB (eseguita solo se non è in cache)
+                    var document = await _repository.GetByIdAsync<DocumentBase>(request.DocumentId);
+
+                    // 2. Se non esiste, solleviamo subito l'eccezione per NON mettere in cache un null
+                    if (document is null)
+                    {
+                        throw new NotFoundException("Document", request.DocumentId);
+                    }
+
+                    // 3. Mappiamo e restituiamo il DTO. Sarà questo record semplice a finire su Redis!
+                    return new DocumentDto(
+                        Id: document.Id,
+                        DocumentNumber: document.DocumentNumber,
+                        Status: document.Status.ToString(),
+                        CustomerId: document.CustomerId,
+                        IssueDate: document.IssueDate,
+                        DocumentType: document.GetType().Name
+                    );
+                },
                 cancellationToken: cancellationToken
             );
 
-            // Se il documento non esiste fisicamente a database
-            if (document is null)
-            {
-                throw new NotFoundException("Document", request.DocumentId);
-            }
-
-            // Mappatura verso il DTO
-            return new DocumentDto(
-                Id: document.Id,
-                DocumentNumber: document.DocumentNumber,
-                Status: document.Status.ToString(),
-                CustomerId: document.CustomerId,
-                IssueDate: document.IssueDate,
-                DocumentType: document.GetType().Name
-            );
+            return documentDto;
         }
     }
 }

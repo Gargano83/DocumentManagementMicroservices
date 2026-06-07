@@ -31,7 +31,6 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
 
             var proforma = new Proforma
             {
-                Id = Guid.NewGuid().ToString(),
                 DocumentNumber = $"PROF-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString()[..4]}",
                 IssueDate = DateTime.UtcNow,
                 CustomerId = quote.CustomerId,

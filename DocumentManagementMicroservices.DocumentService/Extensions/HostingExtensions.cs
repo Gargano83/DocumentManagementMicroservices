@@ -7,6 +7,7 @@ using DocumentManagementMicroservices.DocumentService.Infrastracture.Repositorie
 using FluentValidation;
 using MassTransit;
 using Scalar.AspNetCore;
+using System.Text.Json.Serialization;
 
 namespace DocumentManagementMicroservices.DocumentService.Extensions
 {
@@ -14,7 +15,11 @@ namespace DocumentManagementMicroservices.DocumentService.Extensions
     {
         public static WebApplicationBuilder AddApiConfiguration(this WebApplicationBuilder builder)
         {
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                            .AddJsonOptions(options =>
+                            {
+                                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                            });
 
             // Configurazione Versionamento
             builder.Services.AddApiVersioning(options =>
