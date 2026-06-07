@@ -27,8 +27,9 @@ namespace DocumentManagementMicroservices.AppHost.Extensions
 
             // Database logici distinti da iniettare nei servizi
             var documentDb = mongodb.AddDatabase("documentdb");
+            var auditlogDb = mongodb.AddDatabase("auditlogdb");
 
-            return new InfrastructureResources(redis, rabbitmq, documentDb);
+            return new InfrastructureResources(redis, rabbitmq, documentDb, auditlogDb);
         }
 
         /// <summary>
@@ -45,9 +46,11 @@ namespace DocumentManagementMicroservices.AppHost.Extensions
 
             var documentService = builder.AddProject<Projects.DocumentManagementMicroservices_DocumentService>("documentservice")
                                             .WithReference(infra.DocumentDb)
+                                            .WithReference(infra.AuditLogDb)
                                             .WithReference(infra.Redis)
                                             .WithReference(infra.RabbitMQ)
                                             .WaitFor(infra.DocumentDb)
+                                            .WaitFor(infra.AuditLogDb)
                                             .WaitFor(infra.Redis)
                                             .WaitFor(infra.RabbitMQ);
 

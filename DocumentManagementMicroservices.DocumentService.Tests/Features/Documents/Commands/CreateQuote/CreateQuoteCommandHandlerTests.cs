@@ -1,5 +1,4 @@
-﻿using DocumentManagementMicroservices.BuildingBlocks.Events;
-using DocumentManagementMicroservices.DocumentService.Domain.Entities;
+﻿using DocumentManagementMicroservices.DocumentService.Domain.Entities;
 using DocumentManagementMicroservices.DocumentService.Features.Documents.Commands.CreateQuote;
 using DocumentManagementMicroservices.DocumentService.Infrastracture.Repositories;
 using MassTransit;
@@ -10,17 +9,15 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
     public class CreateQuoteCommandHandlerTests
     {
         private readonly Mock<IDocumentRepository> _repositoryMock;
-        private readonly Mock<IPublishEndpoint> _publishEndpointMock;
         private readonly CreateQuoteCommandHandler _handler;
 
         public CreateQuoteCommandHandlerTests()
         {
             // Setup dei Mock
             _repositoryMock = new Mock<IDocumentRepository>();
-            _publishEndpointMock = new Mock<IPublishEndpoint>();
 
             // Iniezione nel sistema sotto test (SUT)
-            _handler = new CreateQuoteCommandHandler(_repositoryMock.Object, _publishEndpointMock.Object);
+            _handler = new CreateQuoteCommandHandler(_repositoryMock.Object);
         }
 
         [Fact]
@@ -45,12 +42,6 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
                 q.CustomerId == "CUST-123" &&
                 q.Status == DocumentManagementMicroservices.DocumentService.Domain.Enums.DocumentStatus.Draft
             )), Times.Once);
-
-            // Verifico che l'evento MassTransit sia stato pubblicato
-            _publishEndpointMock.Verify(endpoint => endpoint.Publish(
-                It.Is<DocumentCreatedEvent>(e => e.CustomerId == "CUST-123"),
-                It.IsAny<CancellationToken>()
-            ), Times.Once);
         }
     }
 }

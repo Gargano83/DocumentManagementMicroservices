@@ -1,5 +1,4 @@
-﻿using DocumentManagementMicroservices.BuildingBlocks.Events;
-using DocumentManagementMicroservices.DocumentService.Domain.Entities;
+﻿using DocumentManagementMicroservices.DocumentService.Domain.Entities;
 using DocumentManagementMicroservices.DocumentService.Domain.Enums;
 using DocumentManagementMicroservices.DocumentService.Infrastracture.Repositories;
 using MassTransit;
@@ -10,12 +9,10 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
     public class CreateQuoteCommandHandler : IRequestHandler<CreateQuoteCommand, QuoteCreatedDto>
     {
         private readonly IDocumentRepository _repository;
-        private readonly IPublishEndpoint _publishEndpoint;
 
-        public CreateQuoteCommandHandler(IDocumentRepository repository, IPublishEndpoint publishEndpoint)
+        public CreateQuoteCommandHandler(IDocumentRepository repository)
         {
             _repository = repository;
-            _publishEndpoint = publishEndpoint;
         }
 
         public async Task<QuoteCreatedDto> Handle(CreateQuoteCommand request, CancellationToken cancellationToken)
@@ -35,14 +32,6 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
 
             // Salvataggio su MongoDB
             await _repository.CreateAsync(quote);
-
-            // Pubblicazione dell'evento asincrono su RabbitMQ
-            await _publishEndpoint.Publish(new DocumentCreatedEvent(
-                quote.Id,
-                quote.DocumentNumber,
-                quote.CustomerId,
-                quote.CreatedAt
-            ), cancellationToken);
 
             // Restituisco il DTO invece della singola stringa
             return new QuoteCreatedDto(quote.Id, quote.DocumentNumber);

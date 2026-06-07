@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using DocumentManagementMicroservices.BuildingBlocks.Behaviors;
 using DocumentManagementMicroservices.BuildingBlocks.Middlewares;
+using DocumentManagementMicroservices.DocumentService.Features.AuditLogs.Consumers;
 using DocumentManagementMicroservices.DocumentService.Infrastracture.Data;
 using DocumentManagementMicroservices.DocumentService.Infrastracture.Repositories;
 using FluentValidation;
@@ -57,6 +58,7 @@ namespace DocumentManagementMicroservices.DocumentService.Extensions
         {
             // MongoDB (tramite Aspire)
             builder.AddMongoDBClient("documentdb");
+            builder.AddMongoDBClient("auditlogdb");
 
             // Repositories e Seeding
             builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
@@ -73,6 +75,8 @@ namespace DocumentManagementMicroservices.DocumentService.Extensions
             builder.Services.AddMassTransit(x =>
             {
                 x.SetKebabCaseEndpointNameFormatter();
+
+                x.AddConsumer<AuditLogConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {

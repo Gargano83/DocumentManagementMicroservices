@@ -1,7 +1,9 @@
-﻿using DocumentManagementMicroservices.BuildingBlocks.Exceptions;
+﻿using DocumentManagementMicroservices.BuildingBlocks.Events;
+using DocumentManagementMicroservices.BuildingBlocks.Exceptions;
 using DocumentManagementMicroservices.DocumentService.Domain.Entities;
 using DocumentManagementMicroservices.DocumentService.Domain.Enums;
 using DocumentManagementMicroservices.DocumentService.Infrastracture.Repositories;
+using MassTransit;
 using MediatR;
 
 namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Commands.ChangeDocumentStatus
@@ -9,10 +11,12 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
     public class ChangeDocumentStatusCommandHandler : IRequestHandler<ChangeDocumentStatusCommand, DocumentStatusChangedDto>
     {
         private readonly IDocumentRepository _repository;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public ChangeDocumentStatusCommandHandler(IDocumentRepository repository)
+        public ChangeDocumentStatusCommandHandler(IDocumentRepository repository, IPublishEndpoint publishEndpoint)
         {
             _repository = repository;
+            _publishEndpoint = publishEndpoint;
         }
 
         public async Task<DocumentStatusChangedDto> Handle(ChangeDocumentStatusCommand request, CancellationToken cancellationToken)
@@ -44,6 +48,13 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
                 // Questa eccezione verrà mappata come HTTP 409 Conflict nel GlobalExceptionHandler (da aggiungere se desiderato)
                 throw new DomainException($"Concorrenza rilevata. Il documento è stato modificato da un altro utente.", "ConcurrencyConflict");
             }
+
+            // Pubblicazione dell'evento
+            await _publishEndpoint.Publish(new DocumentStatusChangedEvent(document.Id,
+                                                                            oldStatus.ToString(),
+                                                                            request.NewStatus.ToString(),
+                                                                            DateTime.UtcNow
+                                                                            ), cancellationToken);
 
             // Calcoliamo la nuova versione per il DTO di ritorno
             var newVersion = request.ExpectedVersion + 1;
