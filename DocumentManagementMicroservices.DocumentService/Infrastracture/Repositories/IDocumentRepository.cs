@@ -1,4 +1,5 @@
 ﻿using DocumentManagementMicroservices.DocumentService.Domain.Entities;
+using DocumentManagementMicroservices.DocumentService.Domain.Enums;
 
 namespace DocumentManagementMicroservices.DocumentService.Infrastracture.Repositories
 {
@@ -22,5 +23,7 @@ namespace DocumentManagementMicroservices.DocumentService.Infrastracture.Reposit
         /// Aggiorna un documento esistente applicando la concorrenza ottimistica
         /// </summary>
         Task UpdateAsync(DocumentBase document);
+
+        Task<bool> UpdateStatusWithConcurrencyAsync(string id, DocumentStatus newStatus, int expectedVersion);
     }
 }

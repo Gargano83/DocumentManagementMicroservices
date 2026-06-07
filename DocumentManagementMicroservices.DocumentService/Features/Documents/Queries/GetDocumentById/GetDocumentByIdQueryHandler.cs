@@ -1,50 +1,48 @@
-﻿using DocumentManagementMicroservices.DocumentService.Domain.Entities;
+﻿using DocumentManagementMicroservices.BuildingBlocks.Exceptions;
+using DocumentManagementMicroservices.DocumentService.Domain.Entities;
 using DocumentManagementMicroservices.DocumentService.Infrastracture.Repositories;
 using MediatR;
 using Microsoft.Extensions.Caching.Hybrid;
 
 namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Queries.GetDocumentById
 {
-    public class GetDocumentByIdQueryHandler : IRequestHandler<GetDocumentByIdQuery, DocumentDto?>
+    public class GetDocumentByIdQueryHandler : IRequestHandler<GetDocumentByIdQuery, DocumentDto>
     {
         private readonly IDocumentRepository _repository;
-        private readonly HybridCache _cache;
+        private readonly HybridCache _hybridCache;
 
-        public GetDocumentByIdQueryHandler(IDocumentRepository repository, HybridCache cache)
+        public GetDocumentByIdQueryHandler(IDocumentRepository repository, HybridCache hybridCache)
         {
             _repository = repository;
-            _cache = cache;
+            _hybridCache = hybridCache;
         }
 
-        public async Task<DocumentDto?> Handle(GetDocumentByIdQuery request, CancellationToken cancellationToken)
+        public async Task<DocumentDto> Handle(GetDocumentByIdQuery request, CancellationToken cancellationToken)
         {
-            var cacheKey = $"document:{request.Id}";
+            // Definisco la chiave di cache univoca per questo documento
+            var cacheKey = $"document:{request.DocumentId}";
 
-            return await _cache.GetOrCreateAsync(
+            // Uso HybridCache: cerca prima in RAM, poi in Redis, infine esegue la factory (MongoDB)
+            var document = await _hybridCache.GetOrCreateAsync(
                 cacheKey,
-                async cancelToken =>
-                {
-                    // Recupero l'entità di dominio dal DB
-                    var entity = await _repository.GetByIdAsync<DocumentBase>(request.Id);
-
-                    if (entity == null) return null;
-
-                    // Mappo l'entità nel DTO concreto
-                    return new DocumentDto
-                    {
-                        Id = entity.Id,
-                        DocumentNumber = entity.DocumentNumber,
-                        IssueDate = entity.IssueDate,
-                        CustomerId = entity.CustomerId,
-                        Status = entity.Status.ToString(),
-                        DocumentType = entity.GetType().Name,
-
-                        // Pattern matching per estrarre in sicurezza i campi delle classi derivate
-                        ValidUntil = (entity as Quote)?.ValidUntil,
-                        ShippingAddress = (entity as SalesOrder)?.ShippingAddress
-                    };
-                },
+                async cancel => await _repository.GetByIdAsync<DocumentBase>(request.DocumentId),
                 cancellationToken: cancellationToken
+            );
+
+            // Se il documento non esiste fisicamente a database
+            if (document is null)
+            {
+                throw new NotFoundException("Document", request.DocumentId);
+            }
+
+            // Mappatura verso il DTO
+            return new DocumentDto(
+                Id: document.Id,
+                DocumentNumber: document.DocumentNumber,
+                Status: document.Status.ToString(),
+                CustomerId: document.CustomerId,
+                IssueDate: document.IssueDate,
+                DocumentType: document.GetType().Name
             );
         }
     }

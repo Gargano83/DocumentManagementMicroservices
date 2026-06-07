@@ -1,4 +1,5 @@
-﻿using DocumentManagementMicroservices.DocumentService.Features.Documents.Commands.CreateQuote;
+﻿using DocumentManagementMicroservices.DocumentService.Features.Documents.Commands.CreateProformaFromQuote;
+using DocumentManagementMicroservices.DocumentService.Features.Documents.Commands.CreateQuote;
 using DocumentManagementMicroservices.DocumentService.Features.Documents.Queries.GetDocumentById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -21,10 +22,20 @@ namespace DocumentManagementMicroservices.DocumentService.Controllers
         public async Task<IActionResult> CreateQuote([FromBody] CreateQuoteCommand command)
         {
             // MediatR in automatico invoca il CreateQuoteCommandHandler
-            var documentId = await _mediator.Send(command);
+            var result = await _mediator.Send(command);
 
             // Restituisco un codice HTTP 201 Created con l'Id del nuovo documento nel body
-            return Created($"/api/documents/{documentId}", new { Id = documentId });
+            return CreatedAtAction(nameof(GetDocumentById), new { id = result.Id }, result);
+        }
+
+        [HttpPost("{id}/proforma")]
+        public async Task<IActionResult> CreateProformaFromQuote(string id)
+        {
+            var command = new CreateProformaFromQuoteCommand(id);
+            var result = await _mediator.Send(command);
+
+            // Ritorna 201 Created con location fittizia
+            return CreatedAtAction(nameof(GetDocumentById), new { id = result.Id }, result);
         }
 
         [HttpGet("{id}")]

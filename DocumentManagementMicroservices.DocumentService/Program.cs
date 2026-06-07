@@ -1,4 +1,5 @@
 using DocumentManagementMicroservices.DocumentService.Infrastracture.Repositories;
+using FluentValidation;
 using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +22,14 @@ builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 builder.Services.AddHostedService<DocumentManagementMicroservices.DocumentService.Infrastracture.Data.MongoDbSeeder>();
 
 // Registrazione di MediatR per l'implementazione del pattern CQRS
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+    cfg.AddOpenBehavior(typeof(DocumentManagementMicroservices.BuildingBlocks.Behaviors.ValidationBehavior<,>));
+});
+
+// Registrazione del pacchetto FluentValidation
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 // Registrazione di HybridCache (utilizzerà automaticamente Redis come L2 poiché è stato iniettato da Aspire)
 builder.Services.AddHybridCache();
@@ -45,9 +53,15 @@ builder.Services.AddMassTransit(x =>
         cfg.ConfigureEndpoints(context);
     });
 });
+
+// Registrazione dell'Exception Handler e i Problem Details nativi
+builder.Services.AddExceptionHandler<DocumentManagementMicroservices.BuildingBlocks.Middlewares.GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 #endregion
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 app.MapDefaultEndpoints();
 
