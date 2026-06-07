@@ -1,23 +1,27 @@
+using DocumentManagementMicroservices.IdentityService.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Aggiunge i default di Aspire (Telemetria, HealthChecks, ecc.)
 builder.AddServiceDefaults();
 
-builder.Services.AddControllers();
+#region CONFIGURAZIONE API E WEB
+builder.AddApiConfiguration();
+#endregion
 
-builder.Services.AddOpenApi();
+#region CONFIGURAZIONE APPLICATION (HASHING PASSWORD)
+builder.AddApplicationServices();
+#endregion
+
+#region CONFIGURAZIONE INFRASTRUTTURA (DB E CACHE)
+builder.AddInfrastructureServices();
+#endregion
 
 var app = builder.Build();
 
-app.MapDefaultEndpoints();
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
-app.UseHttpsRedirection();
-app.UseAuthorization();
-app.MapControllers();
+// Configurazione della pipeline HTTP
+app.ConfigurePipeline();
 
 app.Run();
+
+public partial class Program { }

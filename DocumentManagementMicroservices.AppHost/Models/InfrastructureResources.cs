@@ -4,6 +4,7 @@
         IResourceBuilder<RedisResource> Redis, 
         IResourceBuilder<RabbitMQServerResource> RabbitMQ, 
         IResourceBuilder<MongoDBDatabaseResource> DocumentDb,
-        IResourceBuilder<MongoDBDatabaseResource> AuditLogDb
+        IResourceBuilder<MongoDBDatabaseResource> AuditLogDb,
+        IResourceBuilder<MongoDBDatabaseResource> IdentityDb
     );
 }

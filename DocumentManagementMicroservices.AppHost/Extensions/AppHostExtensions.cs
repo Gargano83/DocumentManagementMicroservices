@@ -28,8 +28,9 @@ namespace DocumentManagementMicroservices.AppHost.Extensions
             // Database logici distinti da iniettare nei servizi
             var documentDb = mongodb.AddDatabase("documentdb");
             var auditlogDb = mongodb.AddDatabase("auditlogdb");
+            var identityDb = mongodb.AddDatabase("identitydb");
 
-            return new InfrastructureResources(redis, rabbitmq, documentDb, auditlogDb);
+            return new InfrastructureResources(redis, rabbitmq, documentDb, auditlogDb, identityDb);
         }
 
         /// <summary>
@@ -39,8 +40,10 @@ namespace DocumentManagementMicroservices.AppHost.Extensions
         public static MicroserviceResources AddMicroservices(this IDistributedApplicationBuilder builder, InfrastructureResources infra)
         {
             var identityService = builder.AddProject<Projects.DocumentManagementMicroservices_IdentityService>("identityservice")
+                                            .WithReference(infra.IdentityDb)
                                             .WithReference(infra.Redis)
                                             .WithReference(infra.RabbitMQ)
+                                            .WaitFor(infra.IdentityDb)
                                             .WaitFor(infra.Redis)
                                             .WaitFor(infra.RabbitMQ);
 
