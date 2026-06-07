@@ -65,6 +65,7 @@ namespace DocumentManagementMicroservices.DocumentService.Extensions
             builder.Services.AddHostedService<MongoDbSeeder>();
 
             // Cache (Redis tramite Aspire/HybridCache)
+            builder.AddRedisDistributedCache("redis");
             builder.Services.AddHybridCache();
 
             return builder;
