@@ -1,5 +1,8 @@
-﻿namespace DocumentManagementMicroservices.BuildingBlocks.Exceptions
+﻿using System.Runtime.Serialization;
+
+namespace DocumentManagementMicroservices.BuildingBlocks.Exceptions
 {
+#pragma warning disable S3925 // "ISerializable should be implemented correctly". Ignorato perché la serializzazione basata su formatter è obsoleta in .NET 8+ (SYSLIB0051).
     public class DomainException : Exception
     {
         public string ErrorCode { get; }
@@ -17,4 +20,5 @@
         {
         }
     }
+#pragma warning restore S3925
 }

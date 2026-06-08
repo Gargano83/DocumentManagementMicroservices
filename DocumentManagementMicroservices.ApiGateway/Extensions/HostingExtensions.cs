@@ -29,10 +29,7 @@ namespace DocumentManagementMicroservices.ApiGateway.Extensions
                 });
 
             // Definizione della Policy per richiedere il token sulle rotte protette
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("RequireJwt", policy => policy.RequireAuthenticatedUser());
-            });
+            builder.Services.AddAuthorizationBuilder().AddPolicy("RequireJwt", policy => policy.RequireAuthenticatedUser());
 
             // Configurazione di YARP con Service Discovery di Aspire
             builder.Services.AddReverseProxy()

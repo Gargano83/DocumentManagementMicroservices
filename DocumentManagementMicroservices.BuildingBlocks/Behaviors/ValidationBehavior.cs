@@ -16,7 +16,9 @@ namespace DocumentManagementMicroservices.BuildingBlocks.Behaviors
         {
             if (!_validators.Any())
             {
+#pragma warning disable CA2016 // Il delegato RequestHandlerDelegate di MediatR non accetta il CancellationToken
                 return await next();
+#pragma warning restore CA2016
             }
 
             var context = new ValidationContext<TRequest>(request);
@@ -28,7 +30,9 @@ namespace DocumentManagementMicroservices.BuildingBlocks.Behaviors
                 throw new ValidationException(failures);
             }
 
+#pragma warning disable CA2016 // Il delegato RequestHandlerDelegate di MediatR non accetta il CancellationToken
             return await next();
+#pragma warning restore CA2016
         }
     }
 }
