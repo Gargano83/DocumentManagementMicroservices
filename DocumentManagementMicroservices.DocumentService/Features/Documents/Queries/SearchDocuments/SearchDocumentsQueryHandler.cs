@@ -3,6 +3,9 @@ using MediatR;
 
 namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Queries.SearchDocuments
 {
+    /// <summary>
+    /// Query Handler responsabile della ricerca paginata e filtrata dei documenti commerciali.
+    /// </summary>
     public class SearchDocumentsQueryHandler : IRequestHandler<SearchDocumentsQuery, PaginatedDocumentResultDto>
     {
         private readonly IDocumentRepository _repository;
@@ -12,9 +15,12 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Que
             _repository = repository;
         }
 
+        /// <summary>
+        /// Esegue la ricerca delegando l'applicazione dei filtri e restituisce un set di risultati paginato.
+        /// </summary>
         public async Task<PaginatedDocumentResultDto> Handle(SearchDocumentsQuery request, CancellationToken cancellationToken)
         {
-            // Il repository si occuperà di costruire i filtri MongoDB e restituire i dati crudi
+            // Delego la complessità dell'interrogazione al repository.
             var (items, totalCount) = await _repository.SearchAsync(
                 request.CustomerId,
                 request.Status,
@@ -32,6 +38,7 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Que
                 CustomerId: doc.CustomerId
             )).ToList();
 
+            // Restituisco i DTO corredati di una paginazione standardizzata
             return new PaginatedDocumentResultDto(dtos, totalCount, request.PageNumber, request.PageSize);
         }
     }

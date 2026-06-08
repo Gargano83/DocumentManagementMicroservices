@@ -8,6 +8,9 @@ using MediatR;
 
 namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Commands.ChangeDocumentStatus
 {
+    /// <summary>
+    /// Command Handler responsabile della transizione di stato nel ciclo di vita dei documenti.
+    /// </summary>
     public class ChangeDocumentStatusCommandHandler : IRequestHandler<ChangeDocumentStatusCommand, DocumentStatusChangedDto>
     {
         private readonly IDocumentRepository _repository;
@@ -19,6 +22,9 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
             _publishEndpoint = publishEndpoint;
         }
 
+        /// <summary>
+        /// Elabora la transizione di stato garantendo la protezione contro scritture concorrenti.
+        /// </summary>
         public async Task<DocumentStatusChangedDto> Handle(ChangeDocumentStatusCommand request, CancellationToken cancellationToken)
         {
             var document = await _repository.GetByIdAsync<DocumentBase>(request.DocumentId);
@@ -33,11 +39,11 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
             // Controllo di Dominio: Verifica se la transizione di stato è valida
             ValidateStateTransition(oldStatus, request.NewStatus);
 
-            // Aggiornamento in memoria
             document.Status = request.NewStatus;
 
-            // Persistenza con Concorrenza Ottimistica
-            // Passiamo l'ExpectedVersion ricevuta dal comando. Il repository si occuperà dell'incremento.
+            // Persistenza con Concorrenza Ottimistica.
+            // Se due client tentano simultaneamente di modificare lo stato partendo dalla stessa versione (ExpectedVersion),
+            // solo il primo update avrà successo su MongoDB. Il secondo fallirà, proteggendo l'integrità del documento.
             var updateSuccess = await _repository.UpdateStatusWithConcurrencyAsync(
                 document.Id,
                 request.NewStatus,
@@ -45,24 +51,27 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
 
             if (!updateSuccess)
             {
-                // Questa eccezione verrà mappata come HTTP 409 Conflict nel GlobalExceptionHandler (da aggiungere se desiderato)
                 throw new DomainException($"Concorrenza rilevata. Il documento è stato modificato da un altro utente.", "ConcurrencyConflict");
             }
 
-            // Pubblicazione dell'evento
+            // Pubblicazione dell'evento di integrazione asincrono.
+            // Disaccoppia la logica core (il cambio stato) dalle operazioni di contorno (storicizzazione nell'Audit DB).
             await _publishEndpoint.Publish(new DocumentStatusChangedEvent(document.Id,
                                                                             oldStatus.ToString(),
                                                                             request.NewStatus.ToString(),
                                                                             DateTime.UtcNow
                                                                             ), cancellationToken);
 
-            // Calcoliamo la nuova versione per il DTO di ritorno
             var newVersion = request.ExpectedVersion + 1;
 
             return new DocumentStatusChangedDto(document.Id, oldStatus.ToString(), request.NewStatus.ToString(), newVersion);
         }
 
-        private void ValidateStateTransition(DocumentStatus currentStatus, DocumentStatus newStatus)
+        /// <summary>
+        /// Definisce le transizioni consentite per i documenti commerciali.
+        /// Sfrutta il pattern matching di C# per una definizione dichiarativa e leggibile delle regole consentite (passaggi di stato consentiti).
+        /// </summary>
+        private static void ValidateStateTransition(DocumentStatus currentStatus, DocumentStatus newStatus)
         {
             if (currentStatus == newStatus) return;
 
@@ -70,7 +79,7 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
             {
                 (DocumentStatus.Draft, DocumentStatus.Complete) => true,
                 (DocumentStatus.Complete, DocumentStatus.Sent) => true,
-                (DocumentStatus.Complete, DocumentStatus.Draft) => true, // Riportare in bozza
+                (DocumentStatus.Complete, DocumentStatus.Draft) => true,
                 (DocumentStatus.Sent, DocumentStatus.Approved) => true,
                 (DocumentStatus.Sent, DocumentStatus.Rejected) => true,
                 _ => false

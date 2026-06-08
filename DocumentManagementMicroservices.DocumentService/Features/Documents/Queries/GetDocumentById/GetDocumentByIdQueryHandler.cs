@@ -6,6 +6,9 @@ using Microsoft.Extensions.Caching.Hybrid;
 
 namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Queries.GetDocumentById
 {
+    /// <summary>
+    /// Query Handler è responsabile del recupero in lettura di un documento tramite il suo identificativo.
+    /// </summary>
     public class GetDocumentByIdQueryHandler : IRequestHandler<GetDocumentByIdQuery, DocumentDto>
     {
         private readonly IDocumentRepository _repository;
@@ -17,12 +20,16 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Que
             _hybridCache = hybridCache;
         }
 
+        /// <summary>
+        /// Interroga la cache multi-livello e, in caso di miss, esegue il fallback sul database.
+        /// </summary>
         public async Task<DocumentDto> Handle(GetDocumentByIdQuery request, CancellationToken cancellationToken)
         {
-            // Definisco la chiave di cache univoca per questo documento
+            // Definizione di una cache key univoca e partizionata per dominio
             var cacheKey = $"document:{request.DocumentId}";
 
-            // Ora diciamo ad HybridCache di gestire e restituire direttamente il DocumentDto
+            // L'approccio 'GetOrCreateAsync' previene nativamente i problemi di:
+            // richieste concorrenti per la stessa chiave scaduta colpiscono simultaneamente il DB.
             var documentDto = await _hybridCache.GetOrCreateAsync(
                 cacheKey,
                 async cancel =>
@@ -36,7 +43,9 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Que
                         throw new NotFoundException("Document", request.DocumentId);
                     }
 
-                    // 3. Mappiamo e restituiamo il DTO. Sarà questo record semplice a finire su Redis!
+                    // 3. Serializzazione DTO:
+                    // La strategia di salvare direttamente un DTO migliora le performance legate alla deserializzazione JSON all'interno di Redis.
+                    // Il dato conservato in cache è così ottimizzato e pronto per essere servito al client.
                     return new DocumentDto(
                         Id: document.Id,
                         DocumentNumber: document.DocumentNumber,
