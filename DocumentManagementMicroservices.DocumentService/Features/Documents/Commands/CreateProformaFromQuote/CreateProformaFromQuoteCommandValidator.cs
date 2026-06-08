@@ -6,8 +6,8 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
     {
         public CreateProformaFromQuoteCommandValidator()
         {
-            RuleFor(x => x.QuoteId).NotEmpty().WithMessage("Quote ID is required.")
-                                    .Length(24).WithMessage("Quote ID must be a valid 24-character MongoDB ObjectId.");
+            RuleFor(x => x.QuoteId).NotEmpty().WithMessage("L'ID del preventivo è obbligatorio.")
+                                    .Length(24).WithMessage("L'ID del preventivo deve essere un ObjectId di MongoDB valido (24 caratteri).");
         }
     }
 }

@@ -30,30 +30,30 @@ namespace DocumentManagementMicroservices.BuildingBlocks.Middlewares
             {
                 case NotFoundException notFoundEx:
                     problemDetails.Status = StatusCodes.Status404NotFound;
-                    problemDetails.Title = "Resource not found";
+                    problemDetails.Title = "Risorsa non trovata";
                     problemDetails.Detail = notFoundEx.Message;
                     problemDetails.Extensions["errorCode"] = notFoundEx.ErrorCode;
                     break;
 
                 case DomainException domainEx:
                     problemDetails.Status = StatusCodes.Status400BadRequest;
-                    problemDetails.Title = "Domain Rule Violation";
+                    problemDetails.Title = "Violazione delle regole di dominio";
                     problemDetails.Detail = domainEx.Message;
                     problemDetails.Extensions["errorCode"] = domainEx.ErrorCode;
                     break;
 
                 case FluentValidation.ValidationException validationEx:
                     problemDetails.Status = StatusCodes.Status400BadRequest;
-                    problemDetails.Title = "Validation Failed";
-                    problemDetails.Detail = "One or more validation errors occurred.";
+                    problemDetails.Title = "Validazione fallita";
+                    problemDetails.Detail = "Si sono verificati uno o più errori di validazione.";
                     problemDetails.Extensions["errors"] = validationEx.Errors.GroupBy(x => x.PropertyName, x => x.ErrorMessage)
                                                                                 .ToDictionary(x => x.Key, x => x.ToArray());
                     break;
 
                 default:
                     problemDetails.Status = StatusCodes.Status500InternalServerError;
-                    problemDetails.Title = "An unexpected error occurred";
-                    problemDetails.Detail = "Please contact support if the issue persists.";
+                    problemDetails.Title = "Errore interno del server";
+                    problemDetails.Detail = "Si è verificato un errore inaspettato. Contattare il supporto tecnico se il problema persiste.";
                     break;
             }
 

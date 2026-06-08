@@ -16,7 +16,7 @@ namespace DocumentManagementMicroservices.BuildingBlocks.Exceptions
     public class NotFoundException : DomainException
     {
         public NotFoundException(string entityName, object key)
-            : base($"Entity '{entityName}' ({key}) was not found.", "NotFound")
+            : base($"L'entità '{entityName}' con chiave ({key}) non è stata trovata.", "NotFound")
         {
         }
     }
