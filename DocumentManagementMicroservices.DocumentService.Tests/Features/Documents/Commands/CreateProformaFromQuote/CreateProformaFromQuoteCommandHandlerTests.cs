@@ -67,7 +67,7 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
             // Act & Assert
             var exception = await Assert.ThrowsAsync<DomainException>(() => _handler.Handle(request: command, cancellationToken: CancellationToken.None));
 
-            Assert.Contains("Cannot create a Proforma from a Quote in status: Draft", exception.Message);
+            Assert.Contains("Impossibile creare una Proforma da un Preventivo in stato: Draft", exception.Message);
 
             // Verifico che il repository non sia mai stato chiamato per il salvataggio
             _repositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<Proforma>()), Times.Never);
