@@ -5,21 +5,26 @@ using MongoDB.Driver;
 
 namespace DocumentManagementMicroservices.DocumentService.Features.AuditLogs.Consumers
 {
+    /// <summary>
+    /// Consumer asincrono responsabile dell'ascolto degli eventi di dominio e della storicizzazione delle operazioni (Audit).
+    /// </summary>
     public class AuditLogConsumer : IConsumer<DocumentStatusChangedEvent>
     {
         private readonly IMongoCollection<AuditLog> _auditCollection;
         private readonly ILogger<AuditLogConsumer> _logger;
 
-        // Sfrutto il client generico di MongoDB iniettato da Aspire per puntare a un DB diverso
         public AuditLogConsumer(IMongoClient mongoClient, ILogger<AuditLogConsumer> logger)
         {
             _logger = logger;
 
-            // Creo la separazione logica: questo va sul database "DocumentManagement_Audit"
+            // Creazione della separazione logica: le tracce di audit risiedono in un database isolato
             var database = mongoClient.GetDatabase("auditlogdb");
             _auditCollection = database.GetCollection<AuditLog>("AuditLogs");
         }
 
+        /// <summary>
+        /// Elabora il messaggio in ingresso e persiste il log.
+        /// </summary>
         public async Task Consume(ConsumeContext<DocumentStatusChangedEvent> context)
         {
             var message = context.Message;

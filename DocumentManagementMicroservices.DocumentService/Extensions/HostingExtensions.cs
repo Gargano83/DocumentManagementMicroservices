@@ -76,21 +76,29 @@ namespace DocumentManagementMicroservices.DocumentService.Extensions
             return builder;
         }
 
+        /// <summary>
+        /// Configura il Message Broker (RabbitMQ) e registra i consumer asincroni per l'architettura Event-Driven.
+        /// </summary>
         public static WebApplicationBuilder AddMessagingServices(this WebApplicationBuilder builder)
         {
             builder.Services.AddMassTransit(x =>
             {
+                // Standardizza i nomi degli endpoint su RabbitMQ usando il formato kebab-case 
+                // (es. audit-log invece di AuditLog) per compatibilità e pulizia.
                 x.SetKebabCaseEndpointNameFormatter();
 
+                // Registrazione del consumer per la tracciabilità delle operazioni
                 x.AddConsumer<AuditLogConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
+                    // L'orchestrazione tramite .NET Aspire inietta automaticamente la stringa di connessione corretta.
                     var connectionString = builder.Configuration.GetConnectionString("rabbitmq");
                     if (!string.IsNullOrEmpty(connectionString))
                     {
                         cfg.Host(connectionString);
                     }
+                    // Auto-configurazione degli endpoint (code, exchange e binding) basata sui consumer registrati.
                     cfg.ConfigureEndpoints(context);
                 });
             });
