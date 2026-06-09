@@ -1,0 +1,38 @@
+resources:
+- deployment.yaml
+- service.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+- name: identityservice-env
+  literals:
+    - OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY=in_memory
+    - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+    - HTTP_PORTS=8080
+    - IDENTITYDB_HOST=mongodb
+    - IDENTITYDB_PORT=27017
+    - IDENTITYDB_USERNAME=admin
+    - IDENTITYDB_PASSWORD=pP0GIMjdjYZtr6l5LJgRYW
+    - IDENTITYDB_AUTHENTICATIONDATABASE=admin
+    - IDENTITYDB_AUTHENTICATIONMECHANISM=SCRAM-SHA-256
+    - IDENTITYDB_URI=mongodb://admin:{mongodb-password-uri-encoded.value}@mongodb:27017/identitydb?authSource=admin&amp;authMechanism=SCRAM-SHA-256
+    - IDENTITYDB_DATABASENAME=identitydb
+    - REDIS_HOST=redis
+    - REDIS_PORT=6379
+    - REDIS_PASSWORD=swD4xXXCJIXpQP1fuiW52r
+    - REDIS_URI=http://:{redis-password-uri-encoded.value}@redis:6379
+    - RABBITMQ_HOST=rabbitmq
+    - RABBITMQ_PORT=5672
+    - RABBITMQ_USERNAME=guest
+    - RABBITMQ_PASSWORD=NlSf5C5on2sFD0v85IYj3C
+    - RABBITMQ_URI=amqp://guest:{rabbitmq-password-uri-encoded.value}@rabbitmq:5672
+    - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
+    - OTEL_SERVICE_NAME=identityservice
+    - ASPNETCORE_URLS=http://+:8080;
+
+secretGenerator:
+- name: identityservice-secrets
+  envs:
+  - .identityservice.secrets

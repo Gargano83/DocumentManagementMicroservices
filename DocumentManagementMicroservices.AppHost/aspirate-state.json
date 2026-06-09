@@ -1,0 +1,52 @@
+{
+  "projectPath": ".",
+  "inputPath": "aspirate-output",
+  "outputPath": "aspirate-output",
+  "containerImageTags": [
+    "latest"
+  ],
+  "imagePullPolicy": "IfNotPresent",
+  "containerBuilder": "docker",
+  "kubeContext": "minikube",
+  "outputFormat": "kustomize",
+  "skipFinalKustomizeGeneration": false,
+  "privateRegistryEmail": "aspir8@aka.ms",
+  "includeDashboard": true,
+  "useCustomNamespace": false,
+  "secrets": {
+    "salt": "dX83OBv4ZNAx6bJ3",
+    "hash": "s8q5TVcwfobHzOagQGbdzM9pLxMLwbbDumI0\u002BmFQSQY=",
+    "secrets": {
+      "redis-password": {
+        "value": "dX83OBv4ZNAx6bJ32pYdXBAUy/Pi8Uzya2OAi/9kGuuBBdafZgCoWc7xd6tYHdhfdZc="
+      },
+      "rabbitmq-password": {
+        "value": "dX83OBv4ZNAx6bJ33Jnov4GR5qMrx9VCz1bMxsJ/DbnMHruzQnuDb9uRMPUYPdYAdKY="
+      },
+      "mongodb-password": {
+        "value": "dX83OBv4ZNAx6bJ3iIToh2YtwXLLuhPDG3g76/xDbpiwEOS4RhCqXe2XKvhhPug4HrI="
+      },
+      "redis": {},
+      "rabbitmq": {},
+      "mongodb": {},
+      "documentdb": {},
+      "auditlogdb": {},
+      "identitydb": {},
+      "sonarqube": {},
+      "identityservice": {
+        "ConnectionStrings__identitydb": "dX83OBv4ZNAx6bJ3LeTCz/x5S6IQ0TJHkWYSM\u002BF8MLiWOezmA2aRTfLIKPdWGeAEIIrhj81pLWLmy6m/zHT5xb6BIhWNfQzwVmBZHB5Dz0CaL0fSuz\u002BIjo6BtFRWD5\u002BmeP1EqiWAMhGYrbaVvSyjWQ1JkR569/\u002Bi2261rS93NGZXyldN6e6/1aksGn732KQYYW15szdt",
+        "ConnectionStrings__redis": "dX83OBv4ZNAx6bJ3EC2l0/K4oKzPLlJaAqiIk/52OraKZ7jvG3DcWf7SNbpCButXNJLB2ZhBFFLf9Z69\u002BQm90aLFEE7cYA==",
+        "ConnectionStrings__rabbitmq": "dX83OBv4ZNAx6bJ3Ty5040lYqbdgWV9EnrSZc\u002B1\u002BL6/DcqG7WSyDXaXaNKxPFuYeKpSonYFqP2b6zqLg3SvlmrLCJBSKdwy7RC9DCBdL6k\u002B7IErVqD2d1oGFtFY="
+      },
+      "documentservice": {
+        "ConnectionStrings__documentdb": "dX83OBv4ZNAx6bJ3ij/HOVf9V/NArii7l8a2cuF8MLiWOezmA2aRTfLIKPdWGeAEIIrhj81pLWLmy6m/zHT5xb6BIhWNfQzwVmBZHB5Dz0CaL0fSuz\u002BIjo6BtFRWD5\u002Brc/tfsymaPxGYrbaVvSyjWQ1JkR569/\u002Bi2261rS93NGZXyldN6e6/1aksGn732KQYYW15szdt",
+        "ConnectionStrings__auditlogdb": "dX83OBv4ZNAx6bJ3iVtagyE0BKDDZ3VbMr8Hu\u002BF8MLiWOezmA2aRTfLIKPdWGeAEIIrhj81pLWLmy6m/zHT5xb6BIhWNfQzwVmBZHB5Dz0CaL0fSuz\u002BIjo6BtFRWD5\u002BuafxDqiCbLBGYrbaVvSyjWQ1JkR569/\u002Bi2261rS93NGZXyldN6e6/1aksGn732KQYYW15szdt",
+        "ConnectionStrings__redis": "dX83OBv4ZNAx6bJ3EC2l0/K4oKzPLlJaAqiIk/52OraKZ7jvG3DcWf7SNbpCButXNJLB2ZhBFFLf9Z69\u002BQm90aLFEE7cYA==",
+        "ConnectionStrings__rabbitmq": "dX83OBv4ZNAx6bJ3Ty5040lYqbdgWV9EnrSZc\u002B1\u002BL6/DcqG7WSyDXaXaNKxPFuYeKpSonYFqP2b6zqLg3SvlmrLCJBSKdwy7RC9DCBdL6k\u002B7IErVqD2d1oGFtFY="
+      },
+      "apigateway": {},
+      "cond-redis-bindings-tcp-tlsenabled-d148d83a": {}
+    }
+  },
+  "processAllComponents": true
+}

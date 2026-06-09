@@ -1,0 +1,46 @@
+resources:
+- deployment.yaml
+- service.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+- name: documentservice-env
+  literals:
+    - OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY=in_memory
+    - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+    - HTTP_PORTS=8080
+    - DOCUMENTDB_HOST=mongodb
+    - DOCUMENTDB_PORT=27017
+    - DOCUMENTDB_USERNAME=admin
+    - DOCUMENTDB_PASSWORD=pP0GIMjdjYZtr6l5LJgRYW
+    - DOCUMENTDB_AUTHENTICATIONDATABASE=admin
+    - DOCUMENTDB_AUTHENTICATIONMECHANISM=SCRAM-SHA-256
+    - DOCUMENTDB_URI=mongodb://admin:{mongodb-password-uri-encoded.value}@mongodb:27017/documentdb?authSource=admin&amp;authMechanism=SCRAM-SHA-256
+    - DOCUMENTDB_DATABASENAME=documentdb
+    - AUDITLOGDB_HOST=mongodb
+    - AUDITLOGDB_PORT=27017
+    - AUDITLOGDB_USERNAME=admin
+    - AUDITLOGDB_PASSWORD=pP0GIMjdjYZtr6l5LJgRYW
+    - AUDITLOGDB_AUTHENTICATIONDATABASE=admin
+    - AUDITLOGDB_AUTHENTICATIONMECHANISM=SCRAM-SHA-256
+    - AUDITLOGDB_URI=mongodb://admin:{mongodb-password-uri-encoded.value}@mongodb:27017/auditlogdb?authSource=admin&amp;authMechanism=SCRAM-SHA-256
+    - AUDITLOGDB_DATABASENAME=auditlogdb
+    - REDIS_HOST=redis
+    - REDIS_PORT=6379
+    - REDIS_PASSWORD=swD4xXXCJIXpQP1fuiW52r
+    - REDIS_URI=http://:{redis-password-uri-encoded.value}@redis:6379
+    - RABBITMQ_HOST=rabbitmq
+    - RABBITMQ_PORT=5672
+    - RABBITMQ_USERNAME=guest
+    - RABBITMQ_PASSWORD=NlSf5C5on2sFD0v85IYj3C
+    - RABBITMQ_URI=amqp://guest:{rabbitmq-password-uri-encoded.value}@rabbitmq:5672
+    - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
+    - OTEL_SERVICE_NAME=documentservice
+    - ASPNETCORE_URLS=http://+:8080;
+
+secretGenerator:
+- name: documentservice-secrets
+  envs:
+  - .documentservice.secrets

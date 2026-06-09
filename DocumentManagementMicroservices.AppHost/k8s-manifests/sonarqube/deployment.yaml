@@ -1,0 +1,31 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarqube
+  labels:
+    app: sonarqube
+spec:
+  minReadySeconds: 60
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonarqube
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: sonarqube
+    spec:
+      containers:
+      - name: sonarqube
+        image: sonarqube:lts-community
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: sonarqube-ui
+          containerPort: 9000
+        envFrom:
+        - configMapRef:
+            name: sonarqube-env
+      terminationGracePeriodSeconds: 180

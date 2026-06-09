@@ -1,0 +1,14 @@
+resources:
+- redis
+- rabbitmq
+- mongodb
+- sonarqube
+- identityservice
+- documentservice
+- apigateway
+- dashboard.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+

@@ -1,0 +1,314 @@
+{
+  "resources": {
+    "redis": {
+      "type": "container.v0",
+      "connectionString": "{redis.bindings.tcp.host}:{redis.bindings.tcp.port},password={redis-password.value}{cond-redis-bindings-tcp-tlsenabled-d148d83a.connectionString}",
+      "image": "docker.io/library/redis:8.6",
+      "entrypoint": "/bin/sh",
+      "args": [
+        "-c",
+        "redis-server --requirepass $REDIS_PASSWORD --save 60 1"
+      ],
+      "volumes": [
+        {
+          "name": "documentmanagementmicroservices.apphost-89743cb471-redis-data",
+          "target": "/data",
+          "readOnly": false
+        }
+      ],
+      "env": {
+        "REDIS_PASSWORD": "{redis-password.value}"
+      },
+      "bindings": {
+        "tcp": {
+          "scheme": "redis",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "targetPort": 6379
+        }
+      }
+    },
+    "rabbitmq": {
+      "type": "container.v0",
+      "connectionString": "amqp://guest:{rabbitmq-password-uri-encoded.value}@{rabbitmq.bindings.tcp.host}:{rabbitmq.bindings.tcp.port}",
+      "image": "docker.io/library/rabbitmq:4.3-management",
+      "volumes": [
+        {
+          "name": "documentmanagementmicroservices.apphost-89743cb471-rabbitmq-data",
+          "target": "/var/lib/rabbitmq",
+          "readOnly": false
+        }
+      ],
+      "env": {
+        "RABBITMQ_DEFAULT_USER": "guest",
+        "RABBITMQ_DEFAULT_PASS": "{rabbitmq-password.value}"
+      },
+      "bindings": {
+        "tcp": {
+          "scheme": "tcp",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "targetPort": 5672
+        },
+        "management": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http",
+          "targetPort": 15672
+        }
+      }
+    },
+    "mongodb": {
+      "type": "container.v0",
+      "connectionString": "mongodb://admin:{mongodb-password-uri-encoded.value}@{mongodb.bindings.tcp.host}:{mongodb.bindings.tcp.port}/?authSource=admin\u0026authMechanism=SCRAM-SHA-256",
+      "image": "docker.io/library/mongo:8.3",
+      "volumes": [
+        {
+          "name": "documentmanagementmicroservices.apphost-89743cb471-mongodb-data",
+          "target": "/data/db",
+          "readOnly": false
+        }
+      ],
+      "env": {
+        "MONGO_INITDB_ROOT_USERNAME": "admin",
+        "MONGO_INITDB_ROOT_PASSWORD": "{mongodb-password.value}"
+      },
+      "bindings": {
+        "tcp": {
+          "scheme": "tcp",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "targetPort": 27017
+        }
+      }
+    },
+    "documentdb": {
+      "type": "value.v0",
+      "connectionString": "mongodb://admin:{mongodb-password-uri-encoded.value}@{mongodb.bindings.tcp.host}:{mongodb.bindings.tcp.port}/documentdb?authSource=admin\u0026authMechanism=SCRAM-SHA-256"
+    },
+    "auditlogdb": {
+      "type": "value.v0",
+      "connectionString": "mongodb://admin:{mongodb-password-uri-encoded.value}@{mongodb.bindings.tcp.host}:{mongodb.bindings.tcp.port}/auditlogdb?authSource=admin\u0026authMechanism=SCRAM-SHA-256"
+    },
+    "identitydb": {
+      "type": "value.v0",
+      "connectionString": "mongodb://admin:{mongodb-password-uri-encoded.value}@{mongodb.bindings.tcp.host}:{mongodb.bindings.tcp.port}/identitydb?authSource=admin\u0026authMechanism=SCRAM-SHA-256"
+    },
+    "sonarqube": {
+      "type": "container.v0",
+      "image": "sonarqube:lts-community",
+      "bindMounts": [
+        {
+          "source": "sonarqube_data",
+          "target": "/opt/sonarqube/data",
+          "readOnly": false
+        },
+        {
+          "source": "sonarqube_extensions",
+          "target": "/opt/sonarqube/extensions",
+          "readOnly": false
+        },
+        {
+          "source": "sonarqube_logs",
+          "target": "/opt/sonarqube/logs",
+          "readOnly": false
+        }
+      ],
+      "bindings": {
+        "sonarqube-ui": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http",
+          "targetPort": 9000
+        }
+      }
+    },
+    "identityservice": {
+      "type": "project.v0",
+      "path": "../DocumentManagementMicroservices.IdentityService/DocumentManagementMicroservices.IdentityService.csproj",
+      "env": {
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
+        "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
+        "HTTP_PORTS": "{identityservice.bindings.http.targetPort}",
+        "ConnectionStrings__identitydb": "{identitydb.connectionString}",
+        "IDENTITYDB_HOST": "{mongodb.bindings.tcp.host}",
+        "IDENTITYDB_PORT": "{mongodb.bindings.tcp.port}",
+        "IDENTITYDB_USERNAME": "admin",
+        "IDENTITYDB_PASSWORD": "{mongodb-password.value}",
+        "IDENTITYDB_AUTHENTICATIONDATABASE": "admin",
+        "IDENTITYDB_AUTHENTICATIONMECHANISM": "SCRAM-SHA-256",
+        "IDENTITYDB_URI": "mongodb://admin:{mongodb-password-uri-encoded.value}@{mongodb.bindings.tcp.host}:{mongodb.bindings.tcp.port}/identitydb?authSource=admin\u0026authMechanism=SCRAM-SHA-256",
+        "IDENTITYDB_DATABASENAME": "identitydb",
+        "ConnectionStrings__redis": "{redis.connectionString}",
+        "REDIS_HOST": "{redis.bindings.tcp.host}",
+        "REDIS_PORT": "{redis.bindings.tcp.port}",
+        "REDIS_PASSWORD": "{redis-password.value}",
+        "REDIS_URI": "{redis.bindings.tcp.scheme}://:{redis-password-uri-encoded.value}@{redis.bindings.tcp.host}:{redis.bindings.tcp.port}",
+        "ConnectionStrings__rabbitmq": "{rabbitmq.connectionString}",
+        "RABBITMQ_HOST": "{rabbitmq.bindings.tcp.host}",
+        "RABBITMQ_PORT": "{rabbitmq.bindings.tcp.port}",
+        "RABBITMQ_USERNAME": "guest",
+        "RABBITMQ_PASSWORD": "{rabbitmq-password.value}",
+        "RABBITMQ_URI": "amqp://guest:{rabbitmq-password-uri-encoded.value}@{rabbitmq.bindings.tcp.host}:{rabbitmq.bindings.tcp.port}"
+      },
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http"
+        },
+        "https": {
+          "scheme": "https",
+          "protocol": "tcp",
+          "transport": "http"
+        }
+      }
+    },
+    "documentservice": {
+      "type": "project.v0",
+      "path": "../DocumentManagementMicroservices.DocumentService/DocumentManagementMicroservices.DocumentService.csproj",
+      "env": {
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
+        "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
+        "HTTP_PORTS": "{documentservice.bindings.http.targetPort}",
+        "ConnectionStrings__documentdb": "{documentdb.connectionString}",
+        "DOCUMENTDB_HOST": "{mongodb.bindings.tcp.host}",
+        "DOCUMENTDB_PORT": "{mongodb.bindings.tcp.port}",
+        "DOCUMENTDB_USERNAME": "admin",
+        "DOCUMENTDB_PASSWORD": "{mongodb-password.value}",
+        "DOCUMENTDB_AUTHENTICATIONDATABASE": "admin",
+        "DOCUMENTDB_AUTHENTICATIONMECHANISM": "SCRAM-SHA-256",
+        "DOCUMENTDB_URI": "mongodb://admin:{mongodb-password-uri-encoded.value}@{mongodb.bindings.tcp.host}:{mongodb.bindings.tcp.port}/documentdb?authSource=admin\u0026authMechanism=SCRAM-SHA-256",
+        "DOCUMENTDB_DATABASENAME": "documentdb",
+        "ConnectionStrings__auditlogdb": "{auditlogdb.connectionString}",
+        "AUDITLOGDB_HOST": "{mongodb.bindings.tcp.host}",
+        "AUDITLOGDB_PORT": "{mongodb.bindings.tcp.port}",
+        "AUDITLOGDB_USERNAME": "admin",
+        "AUDITLOGDB_PASSWORD": "{mongodb-password.value}",
+        "AUDITLOGDB_AUTHENTICATIONDATABASE": "admin",
+        "AUDITLOGDB_AUTHENTICATIONMECHANISM": "SCRAM-SHA-256",
+        "AUDITLOGDB_URI": "mongodb://admin:{mongodb-password-uri-encoded.value}@{mongodb.bindings.tcp.host}:{mongodb.bindings.tcp.port}/auditlogdb?authSource=admin\u0026authMechanism=SCRAM-SHA-256",
+        "AUDITLOGDB_DATABASENAME": "auditlogdb",
+        "ConnectionStrings__redis": "{redis.connectionString}",
+        "REDIS_HOST": "{redis.bindings.tcp.host}",
+        "REDIS_PORT": "{redis.bindings.tcp.port}",
+        "REDIS_PASSWORD": "{redis-password.value}",
+        "REDIS_URI": "{redis.bindings.tcp.scheme}://:{redis-password-uri-encoded.value}@{redis.bindings.tcp.host}:{redis.bindings.tcp.port}",
+        "ConnectionStrings__rabbitmq": "{rabbitmq.connectionString}",
+        "RABBITMQ_HOST": "{rabbitmq.bindings.tcp.host}",
+        "RABBITMQ_PORT": "{rabbitmq.bindings.tcp.port}",
+        "RABBITMQ_USERNAME": "guest",
+        "RABBITMQ_PASSWORD": "{rabbitmq-password.value}",
+        "RABBITMQ_URI": "amqp://guest:{rabbitmq-password-uri-encoded.value}@{rabbitmq.bindings.tcp.host}:{rabbitmq.bindings.tcp.port}"
+      },
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http"
+        },
+        "https": {
+          "scheme": "https",
+          "protocol": "tcp",
+          "transport": "http"
+        }
+      }
+    },
+    "apigateway": {
+      "type": "project.v0",
+      "path": "../DocumentManagementMicroservices.ApiGateway/DocumentManagementMicroservices.ApiGateway.csproj",
+      "env": {
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
+        "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
+        "HTTP_PORTS": "{apigateway.bindings.http.targetPort}",
+        "IDENTITYSERVICE_HTTP": "{identityservice.bindings.http.url}",
+        "services__identityservice__http__0": "{identityservice.bindings.http.url}",
+        "IDENTITYSERVICE_HTTPS": "{identityservice.bindings.https.url}",
+        "services__identityservice__https__0": "{identityservice.bindings.https.url}",
+        "DOCUMENTSERVICE_HTTP": "{documentservice.bindings.http.url}",
+        "services__documentservice__http__0": "{documentservice.bindings.http.url}",
+        "DOCUMENTSERVICE_HTTPS": "{documentservice.bindings.https.url}",
+        "services__documentservice__https__0": "{documentservice.bindings.https.url}"
+      },
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http"
+        },
+        "https": {
+          "scheme": "https",
+          "protocol": "tcp",
+          "transport": "http"
+        }
+      }
+    },
+    "redis-password": {
+      "type": "parameter.v0",
+      "value": "{redis-password.inputs.value}",
+      "inputs": {
+        "value": {
+          "type": "string",
+          "secret": true,
+          "default": {
+            "generate": {
+              "minLength": 22,
+              "special": false
+            }
+          }
+        }
+      }
+    },
+    "redis-password-uri-encoded": {
+      "type": "annotated.string",
+      "value": "{redis-password.value}",
+      "filter": "uri"
+    },
+    "rabbitmq-password": {
+      "type": "parameter.v0",
+      "value": "{rabbitmq-password.inputs.value}",
+      "inputs": {
+        "value": {
+          "type": "string",
+          "secret": true,
+          "default": {
+            "generate": {
+              "minLength": 22,
+              "special": false
+            }
+          }
+        }
+      }
+    },
+    "rabbitmq-password-uri-encoded": {
+      "type": "annotated.string",
+      "value": "{rabbitmq-password.value}",
+      "filter": "uri"
+    },
+    "mongodb-password": {
+      "type": "parameter.v0",
+      "value": "{mongodb-password.inputs.value}",
+      "inputs": {
+        "value": {
+          "type": "string",
+          "secret": true,
+          "default": {
+            "generate": {
+              "minLength": 22,
+              "special": false
+            }
+          }
+        }
+      }
+    },
+    "mongodb-password-uri-encoded": {
+      "type": "annotated.string",
+      "value": "{mongodb-password.value}",
+      "filter": "uri"
+    },
+    "cond-redis-bindings-tcp-tlsenabled-d148d83a": {
+      "type": "value.v0",
+      "connectionString": ""
+    }
+  }
+}
