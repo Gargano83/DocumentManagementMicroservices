@@ -23,7 +23,7 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
         {
             // Arrange
             var quoteId = "QUOTE-123";
-            var command = new CreateProformaFromQuoteCommand(quoteId);
+            var command = new CreateProformaFromQuoteCommand(QuoteId: quoteId);
 
             var existingQuote = new Quote
             {
@@ -32,11 +32,10 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
                 Status = DocumentStatus.Approved
             };
 
-            _repositoryMock.Setup(repo => repo.GetByIdAsync<DocumentBase>(quoteId))
-                .ReturnsAsync(existingQuote);
+            _repositoryMock.Setup(repo => repo.GetByIdAsync<DocumentBase>(id: quoteId)).ReturnsAsync(existingQuote);
 
             // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
+            var result = await _handler.Handle(request: command, cancellationToken: CancellationToken.None);
 
             // Assert
             Assert.NotNull(result);
@@ -55,7 +54,7 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
         {
             // Arrange
             var quoteId = "QUOTE-123";
-            var command = new CreateProformaFromQuoteCommand(quoteId);
+            var command = new CreateProformaFromQuoteCommand(QuoteId: quoteId);
 
             var draftQuote = new Quote
             {
@@ -63,12 +62,10 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
                 Status = DocumentStatus.Draft
             };
 
-            _repositoryMock.Setup(repo => repo.GetByIdAsync<DocumentBase>(quoteId))
-                .ReturnsAsync(draftQuote);
+            _repositoryMock.Setup(repo => repo.GetByIdAsync<DocumentBase>(id: quoteId)).ReturnsAsync(draftQuote);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<DomainException>(() =>
-                _handler.Handle(command, CancellationToken.None));
+            var exception = await Assert.ThrowsAsync<DomainException>(() => _handler.Handle(request: command, cancellationToken: CancellationToken.None));
 
             Assert.Contains("Cannot create a Proforma from a Quote in status: Draft", exception.Message);
 
@@ -80,12 +77,12 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
         public async Task Handle_WithNonExistentQuote_ShouldThrowNotFoundException()
         {
             // Arrange
-            var command = new CreateProformaFromQuoteCommand("NOT-EXISTING");
+            var command = new CreateProformaFromQuoteCommand(QuoteId: "NOT-EXISTING");
 
-            _repositoryMock.Setup(repo => repo.GetByIdAsync<DocumentBase>(It.IsAny<string>())).ReturnsAsync((DocumentBase?)null);
+            _repositoryMock.Setup(repo => repo.GetByIdAsync<DocumentBase>(id: It.IsAny<string>())).ReturnsAsync((DocumentBase?)null);
 
             // Act & Assert
-            await Assert.ThrowsAsync<NotFoundException>(() => _handler.Handle(command, CancellationToken.None));
+            await Assert.ThrowsAsync<NotFoundException>(() => _handler.Handle(request: command, cancellationToken: CancellationToken.None));
         }
     }
 }

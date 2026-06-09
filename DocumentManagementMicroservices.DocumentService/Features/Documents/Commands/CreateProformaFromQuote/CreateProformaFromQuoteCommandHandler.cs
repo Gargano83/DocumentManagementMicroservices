@@ -24,7 +24,7 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
         public async Task<ProformaCreatedDto> Handle(CreateProformaFromQuoteCommand request, CancellationToken cancellationToken)
         {
             // Estraiamo il documento base e verifichiamo che l'istanza deserializzata sia effettivamente un Quote.
-            var document = await _repository.GetByIdAsync<DocumentBase>(request.QuoteId);
+            var document = await _repository.GetByIdAsync<DocumentBase>(id: request.QuoteId);
 
             if (document is null || document is not Quote quote)
             {
@@ -54,9 +54,9 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
                 SourceQuoteId = quote.Id
             };
 
-            await _repository.CreateAsync(proforma);
+            await _repository.CreateAsync(document: proforma);
 
-            return new ProformaCreatedDto(proforma.Id, proforma.DocumentNumber, proforma.Status);
+            return new ProformaCreatedDto(Id: proforma.Id, DocumentNumber: proforma.DocumentNumber, Status: proforma.Status);
         }
     }
 }

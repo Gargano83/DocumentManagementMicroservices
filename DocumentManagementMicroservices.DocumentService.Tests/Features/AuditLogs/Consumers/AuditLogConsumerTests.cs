@@ -35,7 +35,7 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.AuditLo
         public async Task Consume_ShouldInsertAuditLogIntoDatabase()
         {
             // Arrange
-            var message = new DocumentStatusChangedEvent("DOC-999", "Draft", "Approved", DateTime.UtcNow);
+            var message = new DocumentStatusChangedEvent(DocumentId: "DOC-999", OldStatus: "Draft", NewStatus: "Approved", Timestamp: DateTime.UtcNow);
 
             // Mock del contesto di MassTransit che incapsula il messaggio
             var consumeContextMock = new Mock<ConsumeContext<DocumentStatusChangedEvent>>();

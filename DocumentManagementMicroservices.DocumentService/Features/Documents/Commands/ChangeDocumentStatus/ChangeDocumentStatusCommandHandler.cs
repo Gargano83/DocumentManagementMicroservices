@@ -27,7 +27,7 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
         /// </summary>
         public async Task<DocumentStatusChangedDto> Handle(ChangeDocumentStatusCommand request, CancellationToken cancellationToken)
         {
-            var document = await _repository.GetByIdAsync<DocumentBase>(request.DocumentId);
+            var document = await _repository.GetByIdAsync<DocumentBase>(id: request.DocumentId);
 
             if (document is null)
             {
@@ -37,7 +37,7 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
             var oldStatus = document.Status;
 
             // Controllo di Dominio: Verifica se la transizione di stato è valida
-            ValidateStateTransition(oldStatus, request.NewStatus);
+            ValidateStateTransition(currentStatus: oldStatus, newStatus: request.NewStatus);
 
             document.Status = request.NewStatus;
 
@@ -45,9 +45,9 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
             // Se due client tentano simultaneamente di modificare lo stato partendo dalla stessa versione (ExpectedVersion),
             // solo il primo update avrà successo su MongoDB. Il secondo fallirà, proteggendo l'integrità del documento.
             var updateSuccess = await _repository.UpdateStatusWithConcurrencyAsync(
-                document.Id,
-                request.NewStatus,
-                request.ExpectedVersion);
+                id: document.Id,
+                newStatus: request.NewStatus,
+                expectedVersion: request.ExpectedVersion);
 
             if (!updateSuccess)
             {
@@ -56,15 +56,15 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
 
             // Pubblicazione dell'evento di integrazione asincrono.
             // Disaccoppia la logica core (il cambio stato) dalle operazioni di contorno (storicizzazione nell'Audit DB).
-            await _publishEndpoint.Publish(new DocumentStatusChangedEvent(document.Id,
-                                                                            oldStatus.ToString(),
-                                                                            request.NewStatus.ToString(),
-                                                                            DateTime.UtcNow
+            await _publishEndpoint.Publish(new DocumentStatusChangedEvent(DocumentId: document.Id,
+                                                                          OldStatus: oldStatus.ToString(),
+                                                                          NewStatus: request.NewStatus.ToString(),
+                                                                          Timestamp: DateTime.UtcNow
                                                                             ), cancellationToken);
 
             var newVersion = request.ExpectedVersion + 1;
 
-            return new DocumentStatusChangedDto(document.Id, oldStatus.ToString(), request.NewStatus.ToString(), newVersion);
+            return new DocumentStatusChangedDto(Id: document.Id, OldStatus: oldStatus.ToString(), NewStatus: request.NewStatus.ToString(), NewVersion: newVersion);
         }
 
         /// <summary>

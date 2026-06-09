@@ -17,10 +17,10 @@ namespace DocumentManagementMicroservices.IdentityService.Tests.Integrations
         public async Task Login_WithValidCredentials_ShouldReturnToken()
         {
             // Arrange: Il Seeder ha già creato l'utente "admin" con password "password" all'avvio del container
-            var request = new LoginQuery("admin", "password");
+            var request = new LoginQuery(Username: "admin", Password: "password");
 
             // Act
-            var response = await _client.PostAsJsonAsync("/api/v1/auth/login", request);
+            var response = await _client.PostAsJsonAsync(requestUri: "/api/v1/auth/login", value: request);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -35,10 +35,10 @@ namespace DocumentManagementMicroservices.IdentityService.Tests.Integrations
         public async Task Login_WithInvalidPassword_ShouldReturnUnauthorized()
         {
             // Arrange
-            var request = new LoginQuery("admin", "WrongPassword123");
+            var request = new LoginQuery(Username: "admin", Password: "WrongPassword123");
 
             // Act
-            var response = await _client.PostAsJsonAsync("/api/v1/auth/login", request);
+            var response = await _client.PostAsJsonAsync(requestUri: "/api/v1/auth/login", value: request);
 
             // Assert
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
@@ -48,10 +48,10 @@ namespace DocumentManagementMicroservices.IdentityService.Tests.Integrations
         public async Task Login_WithEmptyInput_ShouldReturnBadRequest()
         {
             // Arrange: Testo che FluentValidation stia intercettando le richieste malformate
-            var request = new LoginQuery("", "");
+            var request = new LoginQuery(Username: "", Password: "");
 
             // Act
-            var response = await _client.PostAsJsonAsync("/api/v1/auth/login", request);
+            var response = await _client.PostAsJsonAsync(requestUri: "/api/v1/auth/login", value: request);
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);

@@ -24,13 +24,13 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
         public async Task Handle_WithValidCommand_ShouldCreateQuoteAndPublishEvent()
         {
             // Arrange
-            var command = new CreateQuoteCommand("CUST-123", 30);
+            var command = new CreateQuoteCommand(CustomerId: "CUST-123", ValidityDays: 30);
 
             // Simulo che il repository accetti l'inserimento senza sollevare eccezioni
-            _repositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Quote>())).Returns(Task.CompletedTask);
+            _repositoryMock.Setup(repo => repo.CreateAsync(document: It.IsAny<Quote>())).Returns(Task.CompletedTask);
 
             // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
+            var result = await _handler.Handle(request: command, cancellationToken: CancellationToken.None);
 
             // Assert
             Assert.NotNull(result);

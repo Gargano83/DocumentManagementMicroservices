@@ -39,7 +39,7 @@ namespace DocumentManagementMicroservices.IdentityService.Features.Auth.Queries.
             // 2. Viene restituito un messaggio generico ("Credenziali non valide") identico sia in caso di utente 
             // inesistente sia di password errata. In questo modo si evita di rivelare a un potenziale attaccante 
             // quale delle due informazioni sia scorretta.
-            if (user is null || !_passwordHasher.Verify(request.Password, user.PasswordHash))
+            if (user is null || !_passwordHasher.Verify(password: request.Password, hash: user.PasswordHash))
             {
                 throw new UnauthorizedAccessException("Credenziali non valide.");
             }

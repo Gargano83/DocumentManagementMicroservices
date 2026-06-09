@@ -22,11 +22,11 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Que
         {
             // Delego la complessità dell'interrogazione al repository.
             var (items, totalCount) = await _repository.SearchAsync(
-                request.CustomerId,
-                request.Status,
-                request.DocumentType,
-                request.PageNumber,
-                request.PageSize);
+                customerId: request.CustomerId,
+                status: request.Status,
+                documentType: request.DocumentType,
+                pageNumber: request.PageNumber,
+                pageSize: request.PageSize);
 
             // Mappo le entità di dominio in DTO di riepilogo
             var dtos = items.Select(doc => new DocumentSummaryDto(
@@ -39,7 +39,7 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Que
             )).ToList();
 
             // Restituisco i DTO corredati di una paginazione standardizzata
-            return new PaginatedDocumentResultDto(dtos, totalCount, request.PageNumber, request.PageSize);
+            return new PaginatedDocumentResultDto(Items: dtos, TotalCount: totalCount, PageNumber: request.PageNumber, PageSize: request.PageSize);
         }
     }
 }

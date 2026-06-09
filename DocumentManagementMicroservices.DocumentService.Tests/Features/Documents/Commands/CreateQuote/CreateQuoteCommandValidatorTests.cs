@@ -15,10 +15,10 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
         public void Validate_WithValidCommand_ShouldNotHaveErrors()
         {
             // Arrange
-            var command = new CreateQuoteCommand("CUST-123", 30);
+            var command = new CreateQuoteCommand(CustomerId: "CUST-123", ValidityDays: 30);
 
             // Act
-            var result = _validator.Validate(command);
+            var result = _validator.Validate(instance: command);
 
             // Assert
             Assert.True(result.IsValid);
@@ -30,10 +30,10 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
         public void Validate_WithEmptyCustomerId_ShouldHaveError(string customerId, int validityDays)
         {
             // Arrange
-            var command = new CreateQuoteCommand(customerId, validityDays);
+            var command = new CreateQuoteCommand(CustomerId: customerId, ValidityDays: validityDays);
 
             // Act
-            var result = _validator.Validate(command);
+            var result = _validator.Validate(instance: command);
 
             // Assert
             Assert.False(result.IsValid);
@@ -46,10 +46,10 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
         public void Validate_WithInvalidValidityDays_ShouldHaveError(string customerId, int validityDays)
         {
             // Arrange
-            var command = new CreateQuoteCommand(customerId, validityDays);
+            var command = new CreateQuoteCommand(CustomerId: customerId, ValidityDays: validityDays);
 
             // Act
-            var result = _validator.Validate(command);
+            var result = _validator.Validate(instance: command);
 
             // Assert
             Assert.False(result.IsValid);

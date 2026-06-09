@@ -22,18 +22,17 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
         public async Task Handle_WhenConcurrencyConflictOccurs_ShouldThrowDomainException()
         {
             // Arrange
-            var command = new UpdateQuoteCommand("QUOTE-123", "NEW-CUST", 15, 1);
+            var command = new UpdateQuoteCommand(QuoteId: "QUOTE-123", CustomerId: "NEW-CUST", ValidityDays: 15, ExpectedVersion: 1);
 
             var existingQuote = new Quote { Id = "QUOTE-123", Status = DocumentStatus.Draft, Version = 1 };
 
-            _repositoryMock.Setup(repo => repo.GetByIdAsync<DocumentBase>(command.QuoteId))
-                .ReturnsAsync(existingQuote);
+            _repositoryMock.Setup(repo => repo.GetByIdAsync<DocumentBase>(id: command.QuoteId)).ReturnsAsync(existingQuote);
 
             // Simulo che il database restituisca false (zero documenti modificati)
-            _repositoryMock.Setup(repo => repo.UpdateQuoteAsync(It.IsAny<Quote>(), command.ExpectedVersion)).ReturnsAsync(false);
+            _repositoryMock.Setup(repo => repo.UpdateQuoteAsync(quote: It.IsAny<Quote>(), expectedVersion: command.ExpectedVersion)).ReturnsAsync(false);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<DomainException>(() => _handler.Handle(command, CancellationToken.None));
+            var exception = await Assert.ThrowsAsync<DomainException>(() => _handler.Handle(request: command, cancellationToken: CancellationToken.None));
 
             Assert.Equal("ConcurrencyConflict", exception.ErrorCode);
         }

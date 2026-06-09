@@ -38,12 +38,12 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
             };
 
             // Salvataggio su MongoDB
-            await _repository.CreateAsync(quote);
+            await _repository.CreateAsync(document: quote);
 
             // Mapping della risposta su un DTO.
             // Evitiamo rigorosamente l'esposizione dell'entità di dominio all'esterno,
             // restituendo solo i dati strettamente necessari al client per proseguire l'interazione.
-            return new QuoteCreatedDto(quote.Id, quote.DocumentNumber);
+            return new QuoteCreatedDto(Id: quote.Id, DocumentNumber: quote.DocumentNumber);
         }
     }
 }

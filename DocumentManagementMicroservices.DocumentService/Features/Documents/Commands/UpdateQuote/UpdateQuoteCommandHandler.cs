@@ -24,7 +24,7 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
         public async Task<QuoteUpdatedDto> Handle(UpdateQuoteCommand request, CancellationToken cancellationToken)
         {
             // Ci assicuriamo che il documento estratto sia effettivamente del tipo atteso (Quote) prima di tentare qualsiasi manipolazione.
-            var document = await _repository.GetByIdAsync<DocumentBase>(request.QuoteId);
+            var document = await _repository.GetByIdAsync<DocumentBase>(id: request.QuoteId);
 
             if (document is null || document is not Quote quote)
             {
@@ -46,7 +46,7 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
             // Passando l'ExpectedVersion ricevuta dal client, il repository verificherà in modo atomico se su MongoDB
             // la versione sul database coincide ancora con quella in memoria. In caso contrario, la scrittura fallisce,
             // prevenendo la sovrascrittura accidentale di dati.
-            var success = await _repository.UpdateQuoteAsync(quote, request.ExpectedVersion);
+            var success = await _repository.UpdateQuoteAsync(quote: quote, expectedVersion: request.ExpectedVersion);
 
             if (!success)
             {
@@ -54,7 +54,7 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
             }
 
             // Ritorno del DTO con la versione incrementata per permettere al client di allineare la sua interfaccia
-            return new QuoteUpdatedDto(quote.Id, request.ValidityDays, request.ExpectedVersion + 1);
+            return new QuoteUpdatedDto(Id: quote.Id, NewValidityDays: request.ValidityDays, NewVersion: request.ExpectedVersion + 1);
         }
     }
 }

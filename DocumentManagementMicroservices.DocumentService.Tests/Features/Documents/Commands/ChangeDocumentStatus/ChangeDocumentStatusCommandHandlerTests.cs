@@ -26,16 +26,15 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
         public async Task Handle_WithValidTransition_ShouldUpdateStatusAndPublishEvent()
         {
             // Arrange
-            var command = new ChangeDocumentStatusCommand("DOC-123", DocumentStatus.Complete, 1);
+            var command = new ChangeDocumentStatusCommand(DocumentId: "DOC-123", NewStatus: DocumentStatus.Complete, ExpectedVersion: 1);
             var existingDoc = new Quote { Id = "DOC-123", Status = DocumentStatus.Draft, Version = 1 };
 
-            _repositoryMock.Setup(repo => repo.GetByIdAsync<DocumentBase>("DOC-123"))
-                .ReturnsAsync(existingDoc);
+            _repositoryMock.Setup(repo => repo.GetByIdAsync<DocumentBase>(id: "DOC-123")).ReturnsAsync(existingDoc);
 
-            _repositoryMock.Setup(repo => repo.UpdateStatusWithConcurrencyAsync("DOC-123", DocumentStatus.Complete, 1)).ReturnsAsync(true);
+            _repositoryMock.Setup(repo => repo.UpdateStatusWithConcurrencyAsync(id: "DOC-123", newStatus: DocumentStatus.Complete, expectedVersion: 1)).ReturnsAsync(true);
 
             // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
+            var result = await _handler.Handle(request: command, cancellationToken: CancellationToken.None);
 
             // Assert
             Assert.Equal(DocumentStatus.Complete.ToString(), result.NewStatus);
@@ -54,20 +53,19 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
         public async Task Handle_WithInvalidTransition_ShouldThrowDomainException()
         {
             // Arrange: Provo a passare da Draft a Sent (non permesso dal nostro switch di dominio)
-            var command = new ChangeDocumentStatusCommand("DOC-123", DocumentStatus.Sent, 1);
+            var command = new ChangeDocumentStatusCommand(DocumentId: "DOC-123", NewStatus: DocumentStatus.Sent, ExpectedVersion: 1);
             var existingDoc = new Quote { Id = "DOC-123", Status = DocumentStatus.Draft, Version = 1 };
 
-            _repositoryMock.Setup(repo => repo.GetByIdAsync<DocumentBase>("DOC-123")).ReturnsAsync(existingDoc);
+            _repositoryMock.Setup(repo => repo.GetByIdAsync<DocumentBase>(id: "DOC-123")).ReturnsAsync(existingDoc);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<DomainException>(() =>
-                _handler.Handle(command, CancellationToken.None));
+            var exception = await Assert.ThrowsAsync<DomainException>(() => _handler.Handle(request: command, cancellationToken: CancellationToken.None));
 
             Assert.Contains("Transizione di stato non consentita", exception.Message);
 
             // Verifico che nulla venga salvato o pubblicato
-            _repositoryMock.Verify(repo => repo.UpdateStatusWithConcurrencyAsync(It.IsAny<string>(), It.IsAny<DocumentStatus>(), It.IsAny<int>()), Times.Never);
-            _publishEndpointMock.Verify(endpoint => endpoint.Publish(It.IsAny<DocumentStatusChangedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
+            _repositoryMock.Verify(repo => repo.UpdateStatusWithConcurrencyAsync(id: It.IsAny<string>(), newStatus: It.IsAny<DocumentStatus>(), expectedVersion: It.IsAny<int>()), Times.Never);
+            _publishEndpointMock.Verify(endpoint => endpoint.Publish(message: It.IsAny<DocumentStatusChangedEvent>(), cancellationToken: It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }

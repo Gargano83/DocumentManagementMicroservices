@@ -38,7 +38,7 @@ namespace DocumentManagementMicroservices.DocumentService.Features.AuditLogs.Con
             };
 
             // Salvataggio asincrono sul database di Audit
-            await _auditCollection.InsertOneAsync(auditEntry, cancellationToken: context.CancellationToken);
+            await _auditCollection.InsertOneAsync(document: auditEntry, cancellationToken: context.CancellationToken);
 
             _logger.LogInformation("Audit Log salvato con successo per il documento {DocumentId}. Nuova transizione: {NewStatus}", message.DocumentId, message.NewStatus);
         }

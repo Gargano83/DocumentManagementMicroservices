@@ -35,7 +35,7 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Que
                 async cancel =>
                 {
                     // 1. Chiamata effettiva a MongoDB (eseguita solo se non è in cache)
-                    var document = await _repository.GetByIdAsync<DocumentBase>(request.DocumentId);
+                    var document = await _repository.GetByIdAsync<DocumentBase>(id: request.DocumentId);
 
                     // 2. Se non esiste, solleviamo subito l'eccezione per NON mettere in cache un null
                     if (document is null)

@@ -17,12 +17,12 @@ namespace DocumentManagementMicroservices.IdentityService.Tests.Integrations
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             // Sovrascrivo la stringa di connessione affinché punti al container Docker effimero
-            builder.UseSetting("ConnectionStrings:identitydb", _mongoDbContainer.GetConnectionString());
+            builder.UseSetting(key: "ConnectionStrings:identitydb", value: _mongoDbContainer.GetConnectionString());
 
             // Configuro i segreti JWT fittizi per l'ambiente di test
-            builder.UseSetting("JwtSettings:SecretKey", "QuestaEUnaChiaveSegretaMoltoLungaESicuraPerGenerareIlTokenJWT2026-TEST!");
-            builder.UseSetting("JwtSettings:Issuer", "TestIssuer");
-            builder.UseSetting("JwtSettings:Audience", "TestAudience");
+            builder.UseSetting(key: "JwtSettings:SecretKey", value: "QuestaEUnaChiaveSegretaMoltoLungaESicuraPerGenerareIlTokenJWT2026-TEST!");
+            builder.UseSetting(key: "JwtSettings:Issuer", value: "TestIssuer");
+            builder.UseSetting(key: "JwtSettings:Audience", value: "TestAudience");
         }
 
         public async Task InitializeAsync()
