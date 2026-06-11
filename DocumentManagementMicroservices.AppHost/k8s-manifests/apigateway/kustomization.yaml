@@ -18,4 +18,5 @@ configMapGenerator:
     - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
     - OTEL_SERVICE_NAME=apigateway
     - ASPNETCORE_URLS=http://+:8080;
+    - JwtSettings__SecretKey=QuestaEUnaChiaveSegretaMoltoLungaESicuraPerGenerareIlTokenJWT2026!
 
