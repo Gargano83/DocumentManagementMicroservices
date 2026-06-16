@@ -54,6 +54,7 @@ namespace DocumentManagementMicroservices.DocumentService.Extensions
                 cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
                 cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
                 cfg.AddOpenBehavior(typeof(IdempotencyBehavior<,>));
+                cfg.AddOpenBehavior(typeof(CachingBehavior<,>));
             });
 
             // FluentValidation
