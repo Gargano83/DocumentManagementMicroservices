@@ -1,4 +1,5 @@
-﻿using DocumentManagementMicroservices.DocumentService.Domain.Entities;
+﻿using DocumentManagementMicroservices.BuildingBlocks.Services;
+using DocumentManagementMicroservices.DocumentService.Domain.Entities;
 using DocumentManagementMicroservices.DocumentService.Domain.Enums;
 using DocumentManagementMicroservices.DocumentService.Infrastracture.Repositories;
 using MediatR;
@@ -11,10 +12,12 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
     public class CreateQuoteCommandHandler : IRequestHandler<CreateQuoteCommand, QuoteCreatedDto>
     {
         private readonly IDocumentRepository _repository;
+        private readonly ICurrentUserService _currentUserService;
 
-        public CreateQuoteCommandHandler(IDocumentRepository repository)
+        public CreateQuoteCommandHandler(IDocumentRepository repository, ICurrentUserService currentUserService)
         {
             _repository = repository;
+            _currentUserService = currentUserService;
         }
 
         /// <summary>
@@ -33,8 +36,7 @@ namespace DocumentManagementMicroservices.DocumentService.Features.Documents.Com
                 CustomerId = request.CustomerId,
                 Status = DocumentStatus.Draft,
                 ValidUntil = DateTime.UtcNow.AddDays(request.ValidityDays),
-                // TODO: In produzione, questo valore verrebbe estratto dall'HttpContext tramite un ICurrentUserService
-                CreatedBy = "API_User"
+                CreatedBy = _currentUserService.UserName ?? "Unknown_User"
             };
 
             // Salvataggio su MongoDB

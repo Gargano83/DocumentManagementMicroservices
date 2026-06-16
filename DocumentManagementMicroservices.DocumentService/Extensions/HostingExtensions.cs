@@ -1,9 +1,11 @@
 ﻿using Asp.Versioning;
 using DocumentManagementMicroservices.BuildingBlocks.Behaviors;
 using DocumentManagementMicroservices.BuildingBlocks.Middlewares;
+using DocumentManagementMicroservices.BuildingBlocks.Services;
 using DocumentManagementMicroservices.DocumentService.Features.AuditLogs.Consumers;
 using DocumentManagementMicroservices.DocumentService.Infrastracture.Data;
 using DocumentManagementMicroservices.DocumentService.Infrastracture.Repositories;
+using DocumentManagementMicroservices.DocumentService.Infrastracture.Services;
 using FluentValidation;
 using MassTransit;
 using Scalar.AspNetCore;
@@ -73,6 +75,10 @@ namespace DocumentManagementMicroservices.DocumentService.Extensions
             // Cache (Redis tramite Aspire/HybridCache)
             builder.AddRedisDistributedCache("redis");
             builder.Services.AddHybridCache();
+
+            // Identità utente loggato
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             return builder;
         }

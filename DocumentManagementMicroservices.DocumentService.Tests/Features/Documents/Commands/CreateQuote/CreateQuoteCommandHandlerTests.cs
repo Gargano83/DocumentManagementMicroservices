@@ -1,7 +1,8 @@
-﻿using DocumentManagementMicroservices.DocumentService.Domain.Entities;
+﻿using DocumentManagementMicroservices.BuildingBlocks.Services;
+using DocumentManagementMicroservices.DocumentService.Domain.Entities;
+using DocumentManagementMicroservices.DocumentService.Domain.Enums;
 using DocumentManagementMicroservices.DocumentService.Features.Documents.Commands.CreateQuote;
 using DocumentManagementMicroservices.DocumentService.Infrastracture.Repositories;
-using MassTransit;
 using Moq;
 
 namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documents.Commands.CreateQuote
@@ -9,15 +10,20 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
     public class CreateQuoteCommandHandlerTests
     {
         private readonly Mock<IDocumentRepository> _repositoryMock;
+        private readonly Mock<ICurrentUserService> _currentUserServiceMock;
         private readonly CreateQuoteCommandHandler _handler;
 
         public CreateQuoteCommandHandlerTests()
         {
             // Setup dei Mock
             _repositoryMock = new Mock<IDocumentRepository>();
+            _currentUserServiceMock = new Mock<ICurrentUserService>();
+
+            // Configuro il mock per fare in modo che, durante i test, simuli un utente autenticato di nome "Test_User"
+            _currentUserServiceMock.Setup(s => s.UserName).Returns("Test_User");
 
             // Iniezione nel sistema sotto test (SUT)
-            _handler = new CreateQuoteCommandHandler(_repositoryMock.Object);
+            _handler = new CreateQuoteCommandHandler(_repositoryMock.Object, _currentUserServiceMock.Object);
         }
 
         [Fact]
@@ -40,7 +46,8 @@ namespace DocumentManagementMicroservices.DocumentService.Tests.Features.Documen
             // Verifico che il repository sia stato chiamato esattamente 1 volta con un'entità Quote
             _repositoryMock.Verify(repo => repo.CreateAsync(It.Is<Quote>(q =>
                 q.CustomerId == "CUST-123" &&
-                q.Status == DocumentManagementMicroservices.DocumentService.Domain.Enums.DocumentStatus.Draft
+                q.Status == DocumentStatus.Draft &&
+                q.CreatedBy == "Test_User"
             )), Times.Once);
         }
     }

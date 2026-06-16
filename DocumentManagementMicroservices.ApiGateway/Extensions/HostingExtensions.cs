@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Yarp.ReverseProxy.Transforms;
 
 namespace DocumentManagementMicroservices.ApiGateway.Extensions
 {
@@ -34,7 +35,36 @@ namespace DocumentManagementMicroservices.ApiGateway.Extensions
             // Configurazione di YARP con Service Discovery di Aspire
             builder.Services.AddReverseProxy()
                             .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"))
-                            .AddServiceDiscoveryDestinationResolver();
+                            .AddServiceDiscoveryDestinationResolver()
+                            .AddTransforms(builderContext =>
+                            {
+                                builderContext.AddRequestTransform(async transformContext =>
+                                {
+                                    var user = transformContext.HttpContext.User;
+
+                                    if (user.Identity?.IsAuthenticated == true)
+                                    {
+                                        // Estraggo l'Id (sub) e lo Username (name) dai Claims del JWT
+                                        var userId = user.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value
+                                                     ?? user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                                        var userName = user.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Name)?.Value
+                                                       ?? user.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+
+                                        if (!string.IsNullOrEmpty(userId))
+                                        {
+                                            transformContext.ProxyRequest.Headers.Remove("X-User-Id");
+                                            transformContext.ProxyRequest.Headers.Add("X-User-Id", userId);
+                                        }
+
+                                        if (!string.IsNullOrEmpty(userName))
+                                        {
+                                            transformContext.ProxyRequest.Headers.Remove("X-User-Name");
+                                            transformContext.ProxyRequest.Headers.Add("X-User-Name", userName);
+                                        }
+                                    }
+                                });
+                            });
 
             return builder;
         }
