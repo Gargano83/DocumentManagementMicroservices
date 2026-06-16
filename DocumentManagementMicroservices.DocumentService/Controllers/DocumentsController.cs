@@ -63,6 +63,12 @@ namespace DocumentManagementMicroservices.DocumentService.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateQuote([FromBody] CreateQuoteCommand command)
         {
+            // Estraggo la chiave dall'header HTTP "X-Idempotency-Key" se presente
+            if (Request.Headers.TryGetValue("X-Idempotency-Key", out var headerValue))
+            {
+                command.IdempotencyKey = headerValue.ToString();
+            }
+
             // MediatR in automatico invoca il CreateQuoteCommandHandler
             var result = await _mediator.Send(request: command);
 
